@@ -1,0 +1,315 @@
+* {
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #101010;
+    color: #eee;
+}
+
+/* =======================
+   HEADER
+   ======================= */
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #181818;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.admin-header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.admin-header h1 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.back-link {
+    font-size: 0.85rem;
+    color: #9ad;
+    text-decoration: none;
+    opacity: 0.8;
+}
+
+.back-link:hover {
+    opacity: 1;
+}
+
+/* =======================
+   MAIN LAYOUT
+   ======================= */
+.admin-main {
+    display: flex;
+    flex-direction: row;
+    height: calc(100vh - 80px);
+    overflow: hidden;
+}
+
+/* =======================
+   LEFT PANEL — chore list
+   ======================= */
+.chore-list-panel {
+    width: 30%;
+    min-width: 250px;
+    max-width: 400px;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    border-right: 1px solid #444;
+    background: #141414;
+    padding-bottom: 2rem;
+}
+
+/* Sticky list header */
+.panel-header {
+    padding: 0.75rem;
+    border-bottom: 1px solid #333;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #222;
+}
+
+.panel-header h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+}
+
+#searchInput {
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border-radius: 0.4rem;
+    border: 1px solid #444;
+    background: #111;
+    color: #eee;
+}
+
+.chore-list {
+    flex: 1;
+}
+
+.chore-list-item {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+}
+
+.chore-list-item:hover {
+    background: #1c1c1c;
+}
+
+.chore-list-item.selected {
+    background: #263344;
+}
+
+.chore-list-item .chore-name {
+    font-size: 0.95rem;
+    margin-bottom: 0.1rem;
+}
+
+.chore-list-item .chore-meta {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+/* =======================
+   RIGHT PANEL — editor
+   ======================= */
+.chore-editor-panel {
+    flex: 1;
+    height: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+.chore-editor-panel h2 {
+    margin-top: 0;
+}
+
+.chore-form {
+    display: none;
+}
+
+.no-chore-message {
+    margin-top: 1rem;
+    opacity: 0.8;
+}
+
+/* =======================
+   FORM FIELDS
+   ======================= */
+.form-row {
+    margin-bottom: 0.6rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-row.inline {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-row label {
+    font-size: 0.85rem;
+    margin-bottom: 0.15rem;
+}
+
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row textarea,
+.form-row select {
+    background: #111;
+    color: #eee;
+    border-radius: 0.4rem;
+    border: 1px solid #444;
+    padding: 0.35rem 0.45rem;
+    font-size: 0.9rem;
+}
+
+.form-row textarea {
+    resize: vertical;
+}
+
+.hint {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.radio-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.read-only-row span {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+/* =======================
+   BUTTONS
+   ======================= */
+.primary-button,
+.secondary-button,
+.danger-button {
+    border: none;
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.primary-button {
+    background: #3a7;
+    color: #fff;
+}
+
+.secondary-button {
+    background: #444;
+    color: #eee;
+}
+
+.danger-button {
+    background: #b33;
+    color: #fff;
+}
+
+.primary-button:active,
+.secondary-button:active,
+.danger-button:active {
+    transform: scale(0.97);
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 0.75rem;
+    gap: 0.5rem;
+}
+
+.form-actions .spacer {
+    flex: 1;
+}
+
+/* =======================
+   RESPONSIVE
+   ======================= */
+@media (max-width: 800px) {
+    .admin-main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    .chore-list-panel {
+        height: 40vh;
+    }
+
+    .chore-editor-panel {
+        height: 60vh;
+    }
+}
+
+/* =======================
+   CRON FIELD
+   ======================= */
+#cronField {
+    margin-top: 8px;
+}
+#cronField input {
+    width: 100%;
+}
+
+/* =======================
+   MODAL SYSTEM
+   ======================= */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-content {
+    background: #222;
+    padding: 1.2rem;
+    border-radius: 0.75rem;
+    width: min(500px, 90vw);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.modal-actions button {
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+}
+
+.hidden {
+    display: none !important;
+}

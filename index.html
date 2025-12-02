@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chore Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Chore Manager</h1>
+        <div id="dateDisplay"></div>
+    </header>
+
+    <main>
+        <div id="choreGrid" class="chore-grid">
+            <!-- Chores injected by script.js -->
+        </div>
+        <div id="noChoresMessage" class="hidden">
+            No chores due right now. GGs!
+        </div>
+
+        <h2 class="section-title">Assigned Chores</h2>
+        <div id="assignedChoreSection"></div>
+
+    </main>
+
+    <!-- User selection modal -->
+    <div id="userModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Who completed this chore?</h2>
+            <p id="modalChoreName"></p>
+            <div id="userButtons" class="user-buttons">
+                <!-- user buttons injected by script.js -->
+            </div>
+
+                <div class="form-row inline" style="margin: 0.5rem 0;">
+                    <label style="font-size: 0.85rem;">
+                     <input type="checkbox" id="claimCheckbox">
+        Claim (assign to user, don't complete yet)
+      </label>
+    </div>
+            <div class="modal-actions">
+                <button id="cancelUserSelect">Cancel</button>
+                <button id="confirmUserSelect" disabled>OK</button>
+            </div>
+        </div>
+    </div>
+
+
+    <footer id="streakFooter" class="streak-footer">
+    Current streak: <span id="streakValue">0</span> weeks
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

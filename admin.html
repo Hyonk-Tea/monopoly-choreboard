@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chore Manager Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<header class="admin-header">
+    <div class="admin-header-left">
+        <a href="index.html" class="back-link">&larr; Back to Chore Board</a>
+        <h1>Chore Manager Admin</h1>
+    </div>
+
+    <button id="resetPointsBtn" class="danger-button">Reset Weekly Points</button>
+    <button id="addPointsButton" class="secondary-button">Add Points</button>
+
+
+    <button id="addChoreBtn" class="primary-button">Add New Chore</button>
+</header>
+
+<main class="admin-main">
+    <!-- ========== LEFT PANEL ========== -->
+    <section class="chore-list-panel">
+        <div class="panel-header">
+            <h2>Chores</h2>
+            <input type="text" id="searchInput" placeholder="Search chores...">
+        </div>
+        <div id="choreList" class="chore-list"></div>
+    </section>
+
+    <!-- ========== RIGHT PANEL (EDITOR) ========== -->
+    <section class="chore-editor-panel">
+        <h2 id="editorTitle">Select a chore to edit</h2>
+
+        <form id="choreForm" class="chore-form">
+
+            <!-- ID -->
+            <div class="form-row">
+                <label>ID</label>
+                <input type="text" id="choreId" readonly placeholder="(auto-generated)">
+            </div>
+
+            <!-- Name -->
+            <div class="form-row">
+                <label for="choreName">Name</label>
+                <input type="text" id="choreName" required>
+            </div>
+
+            <!-- Description -->
+            <div class="form-row">
+                <label for="choreDescription">Description</label>
+                <textarea id="choreDescription" rows="2"></textarea>
+            </div>
+
+            <!-- Value -->
+            <div class="form-row">
+                <label for="choreValue">Value</label>
+                <input type="number" id="choreValue" value="1" min="0" step="0.01">
+            </div>
+
+            <!-- Spawn -->
+            <div class="form-row inline">
+                <label>Spawn</label>
+                <input type="checkbox" id="choreSpawn" checked>
+                <span class="hint">Show automatically when due</span>
+            </div>
+
+            <hr>
+
+            <!-- Frequency Type -->
+            <div class="form-row">
+                <label for="frequencyType">Frequency Type</label>
+                <select id="frequencyType">
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly (choose day)</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="custom">Custom (every N days)</option>
+                    <option value="after">After another chore</option>
+                    <option value="cron">Cron (advanced)</option>
+                </select>
+            </div>
+
+            <!-- WEEKLY DAY DROPDOWN -->
+            <div class="form-row" id="weeklyDayRow" style="display:none;">
+                <label for="weeklyDay">Weekly Day</label>
+                <select id="weeklyDay">
+                    <option value="0">Sunday</option>
+                    <option value="1">Monday</option>
+                    <option value="2">Tuesday</option>
+                    <option value="3">Wednesday</option>
+                    <option value="4">Thursday</option>
+                    <option value="5">Friday</option>
+                    <option value="6">Saturday</option>
+                </select>
+            </div>
+
+            <!-- Custom days -->
+            <div class="form-row" id="customDaysRow">
+                <label for="customDays">Custom days</label>
+                <input type="number" id="customDays" min="1" step="1" value="1">
+            </div>
+
+            <!-- After-chore selector -->
+            <div class="form-row" id="afterChoreRow">
+                <label for="afterChoreId">After chore</label>
+                <select id="afterChoreId"></select>
+            </div>
+
+            <!-- Cron -->
+            <div class="form-row" id="cronField">
+                <label for="cronExpression">Cron Expression</label>
+                <input type="text" id="cronExpression" placeholder="* * * * *">
+            </div>
+
+            <!-- After Dinner -->
+            <div class="form-row">
+                <label><input type="checkbox" id="afterDinnerCheckbox"> After Dinner Chore</label>
+            </div>
+
+            <hr>
+
+            <!-- Visibility -->
+            <div class="form-row">
+                <label>Visibility</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="visibility" value="public" checked> Public chore</label>
+                    <label><input type="radio" name="visibility" value="assigned"> Assigned chore</label>
+                </div>
+            </div>
+
+            <!-- UNDESIRABLE -->
+            <div class="form-row">
+                <label><input type="checkbox" id="undesirableCheckbox"> Undesirable chore</label>
+            </div>
+
+            <!-- Eligible user checkboxes -->
+            <div class="form-row" id="undesirableUsersRow" style="display:none; flex-direction:column;">
+                <label>Users eligible for undesirable assignment:</label>
+                <div id="undesirableUsersContainer"></div>
+            </div>
+
+            <!-- Assigned To -->
+            <div class="form-row" id="assignedToRow">
+                <label for="assignedTo">Assigned to</label>
+                <select id="assignedTo">
+                    <option value="">-- select user --</option>
+                    <option value="ash">ash</option>
+                    <option value="vast">vast</option>
+                    <option value="sephy">sephy</option>
+                    <option value="hope">hope</option>
+                    <option value="cylis">cylis</option>
+                    <option value="phil">phil</option>
+                    <option value="selina">selina</option>
+                </select>
+            </div>
+
+            <hr>
+
+            <!-- Read-only stats -->
+            <div class="form-row read-only-row">
+                <label>Last marked date</label>
+                <span id="lastMarkedDateDisplay">—</span>
+            </div>
+            <div class="form-row read-only-row">
+                <label>Last marked by</label>
+                <span id="lastMarkedByDisplay">—</span>
+            </div>
+            <div class="form-row read-only-row">
+                <label>Times marked off</label>
+                <span id="timesMarkedOffDisplay">0</span>
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-actions">
+                <button type="button" id="resetStatsBtn" class="secondary-button">Reset Stats</button>
+                <div class="spacer"></div>
+                <button type="button" id="undoChoreBtn" class="secondary-button">Undo</button>
+                <button type="button" id="skipChoreBtn" class="secondary-button">Skip</button>
+                <button type="button" id="deleteChoreBtn" class="danger-button">Delete</button>
+                <button type="submit" class="primary-button">Save</button>
+            </div>
+        </form>
+
+        <div id="noChoreSelectedMessage" class="no-chore-message">
+            Select a chore from the list or click "Add New Chore" to begin.
+        </div>
+
+        
+
+    </section>
+</main>
+
+<!-- =======================
+     ADD POINTS MODAL
+======================== -->
+<div id="addPointsModal" class="modal hidden">
+    <div class="modal-content">
+
+        <h2>Add Points</h2>
+
+        <!-- User Selector -->
+        <div class="form-row">
+            <label for="addPointsUser">Which User?</label>
+            <select id="addPointsUser">
+                <option value="ash">ash</option>
+                <option value="vast">vast</option>
+                <option value="sephy">sephy</option>
+                <option value="hope">hope</option>
+                <option value="cylis">cylis</option>
+                <option value="phil">phil</option>
+                <option value="selina">selina</option>
+            </select>
+        </div>
+
+        <!-- Point Amount -->
+        <div class="form-row">
+            <label for="addPointsValue">How many?</label>
+            <input type="number" id="addPointsValue" min="1" step="1">
+        </div>
+
+        <!-- Modal buttons -->
+        <div class="modal-actions">
+            <button id="addPointsCancel" class="secondary-button">Cancel</button>
+            <button id="addPointsConfirm" class="primary-button">Add</button>
+        </div>
+
+    </div>
+</div>
+
+
+<script src="admin.js"></script>
+</body>
+</html>
