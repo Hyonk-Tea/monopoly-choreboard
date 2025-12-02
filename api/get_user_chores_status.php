@@ -5,7 +5,33 @@ date_default_timezone_set('America/Chicago');
 // -----------------------------------------------------------------------------
 // CONFIG
 // -----------------------------------------------------------------------------
+/**
+ * Represents the file location or path associated with a chore record or task.
+ * This variable is typically intended to store the name, path, or reference
+ * to a file used for storing chore details or configurations.
+ *
+ * @var string Path or name of the file related to chore records.
+ */
 $choreFile = __DIR__ . '/../data/chores.json';
+/**
+ * Represents the directory path of the user's folder.
+ *
+ * This variable stores the absolute or relative path
+ * to the location designated for user-specific files
+ * or operations within the application. The path
+ * should conform to the file system structure of the
+ * operating environment.
+ *
+ * Typical use cases include determining where to save
+ * user-generated content, accessing configuration files,
+ * or managing user-specific resources.
+ *
+ * It is expected that the value assigned to this variable
+ * is properly sanitized to avoid any potential security
+ * vulnerabilities, such as directory traversal attacks.
+ *
+ * @var string Absolute or relative path to the user's directory.
+ */
 $userDir   = __DIR__ . '/../data/users';
 
 // -----------------------------------------------------------------------------
@@ -16,7 +42,21 @@ if (!file_exists($choreFile)) {
     exit;
 }
 
+/**
+ * The $raw variable is intended to hold raw, unprocessed data.
+ * It is generally used when dealing with unformatted or unvalidated input,
+ * such as data received from an external source (e.g., user input, API response).
+ *
+ * Developers should ensure proper validation and sanitization are performed
+ * before using the content of this variable in sensitive operations or output.
+ */
 $raw  = file_get_contents($choreFile);
+/**
+ * An array containing a list of chores.
+ *
+ * This variable is used to store tasks or responsibilities that need to be performed.
+ * Each element in the array represents a specific chore and can be managed accordingly.
+ */
 $chores = json_decode($raw, true);
 
 if (!is_array($chores)) {
@@ -25,10 +65,35 @@ if (!is_array($chores)) {
 }
 
 // Supported users
+/**
+ * @var array $users
+ *
+ * This variable stores a collection of user data, where each element represents
+ * an individual user. The structure of each user's data within the array may
+ * vary depending on the application's requirements but typically includes fields
+ * such as user ID, name, email, and other related attributes.
+ *
+ * It is intended for managing and processing user-related information throughout
+ * the application.
+ */
 $users = ["ash", "vast", "sephy", "hope", "cylis", "phil", "selina"];
 
 // Today
+/**
+ * Represents the current date. This variable is expected to hold the current date
+ * and can be used for date-based operations such as comparisons, formatting,
+ * or other date-related functionalities.
+ *
+ * Type: DateTime|string
+ */
 $today    = new DateTime();
+/**
+ * Represents the current date as a string.
+ *
+ * The string is formatted based on the current system date and may
+ * follow a specific date format (e.g., 'Y-m-d' for "2023-10-12").
+ * Typically used for displaying or processing the date in string form.
+ */
 $todayStr = $today->format("Y-m-d");
 
 // -----------------------------------------------------------------------------
@@ -36,7 +101,16 @@ $todayStr = $today->format("Y-m-d");
 // -----------------------------------------------------------------------------
 
 /**
- * Build chore map by id (used for after-chores).
+ * An associative array that maps chore identifiers to their corresponding details.
+ *
+ * This variable is used to manage and store information about various chores/tasks
+ * in an organized manner. Each key in the array represents a unique identifier
+ * for a chore, while the value contains details related to that chore,
+ * such as its description, status, or other metadata.
+ *
+ * Example structure:
+ * - The key can be a string or integer representing the chore ID.
+ * - The value can be an array or object containing the chore's attributes.
  */
 $choreMap = [];
 foreach ($chores as $c) {
@@ -46,7 +120,13 @@ foreach ($chores as $c) {
 }
 
 /**
- * Least-used user for undesirable chores
+ * Finds the user with the least number of times assigned to a specific chore from a list of eligible users.
+ *
+ * @param string $choreName The name of the chore to evaluate.
+ * @param array $eligibleUsers An array of user identifiers who are eligible for the chore.
+ * @param string $userDir The directory path where user JSON files containing chore statistics are stored.
+ *
+ * @return string The identifier of the user with the least usage for the specified chore. Defaults to the first eligible user if no data is found.
  */
 function findLeastUsedUserForChore($choreName, $eligibleUsers, $userDir) {
     $lowest = PHP_INT_MAX;
@@ -75,9 +155,18 @@ function findLeastUsedUserForChore($choreName, $eligibleUsers, $userDir) {
 }
 
 /**
- * Check if a chore is due today, using logic aligned with script.js computeChoreStatus.
- * Returns true if the chore should be considered due (or overdue).
- * Does NOT check spawn, inPool, afterDinner, or assignment, the caller handles that.
+ * Determines whether a chore is due based on its frequency type, last marked date,
+ * and additional configuration details.
+ *
+ * @param array $chore An array containing details about the chore, such as its frequency type,
+ *                     last marked date, and optional custom configurations like cron expressions
+ *                     or dependent chores.
+ * @param DateTime $today A DateTime object representing the current date.
+ * @param string $todayStr A string representation of the current date in the format 'Y-m-d'.
+ * @param array $choreMap An associative array where keys are chore IDs, and values are chore data
+ *                        (used for dependent chore calculations).
+ *
+ * @return bool True if the chore is due today, false otherwise.
  */
 function isChoreDue(array $chore, DateTime $today, string $todayStr, array $choreMap): bool
 {
@@ -208,6 +297,20 @@ function isChoreDue(array $chore, DateTime $today, string $todayStr, array $chor
 // MAIN: DETERMINE IF EACH USER HAS ANY DUE USER-SPECIFIC CHORES
 // -----------------------------------------------------------------------------
 
+/**
+ * Stores the outcome or output of a specific operation, function, or process.
+ *
+ * This variable is typically used to hold the result of a computation, database query,
+ * API call, or any other operation, and its type and content may vary.
+ *
+ * The exact usage and data type of $result depend on the context in which it is used.
+ *
+ * It can represent:
+ * - A numerical computation result
+ * - A boolean status indicating success or failure
+ * - A string or array containing data or response
+ * - Other forms of processed or returned data
+ */
 $result = [];
 
 foreach ($users as $u) {

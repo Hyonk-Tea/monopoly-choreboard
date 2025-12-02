@@ -1,10 +1,58 @@
+/**
+ * A constant representing the base path for the API endpoints.
+ * It is used as the root segment for constructing API URLs.
+ * This helps in standardizing and centralizing the API path configuration.
+ *
+ * @constant {string} API_BASE
+ */
 const API_BASE = "api";
 
+/**
+ * An array that holds a list of chores.
+ * Each chore represents a task or duty to be performed.
+ * This variable is initialized as an empty array and can be populated with chores as needed.
+ */
 let chores = [];
+/**
+ * An object used to store and manage chores indexed by their unique identifier.
+ * The keys represent the unique IDs of chores, and the values are the corresponding chore data.
+ */
 let choreById = {};
+/**
+ * Represents the identifier of the currently selected chore.
+ * This variable is used to track which chore is selected by the user.
+ *
+ * The value can be:
+ * - A valid identifier for a selected chore (usually a unique value like an integer or string).
+ * - `null` if no chore is selected.
+ *
+ * This helps in managing the state of selected chores in applications such as task trackers or chore management systems.
+ */
 let selectedChoreId = null;
+/**
+ * A boolean flag indicating whether the chore is newly created.
+ *
+ * - `true`: The chore is newly created and has not been processed or marked as existing.
+ * - `false`: The chore is not new and already exists in the system.
+ */
 let isNewChore = false;
 
+/**
+ * A constant array containing a predefined list of user names.
+ * Represents a collection of string values, each corresponding to a user.
+ * This array is immutable and cannot be modified after initialization.
+ *
+ * Each element in the array is a string value representing a user:
+ * - "ash"
+ * - "vast"
+ * - "sephy"
+ * - "hope"
+ * - "cylis"
+ * - "phil"
+ * - "selina"
+ *
+ * Suitable for use cases where a fixed list of user identifiers is required.
+ */
 const USERS = ["ash", "vast", "sephy", "hope", "cylis", "phil", "selina"];
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -15,6 +63,12 @@ document.addEventListener("DOMContentLoaded", () => {
 // ---------------------------------------------------------------
 // UI SETUP
 // ---------------------------------------------------------------
+/**
+ * Initializes and sets up the user interface by attaching event listeners
+ * to various UI elements for handling user interactions.
+ *
+ * @return {void} This function does not return any value.
+ */
 function setupUI() {
     const addBtn = document.getElementById("addChoreBtn");
     const form = document.getElementById("choreForm");
@@ -53,6 +107,12 @@ function setupUI() {
 // ---------------------------------------------------------------
 // LOAD & RENDER CHORES
 // ---------------------------------------------------------------
+/**
+ * Loads chores from the server and processes the data to populate chore-related structures.
+ * The method fetches the list of chores, organizes them by ID, and triggers UI updates.
+ *
+ * @return {Promise<void>} A promise that resolves when chores are successfully loaded and processed.
+ */
 async function loadChores() {
     try {
         const res = await fetch(`${API_BASE}/get_all_chores.php`);
@@ -73,6 +133,14 @@ async function loadChores() {
     }
 }
 
+/**
+ * Renders a list of chores into the DOM element with the ID "choreList".
+ * Filters the chores based on a search term entered in the input field with the ID "searchInput".
+ * Displays each chore with its details and hierarchical structure.
+ * Adds event listeners to each chore for selection and interaction.
+ *
+ * @return {void} This method does not return a value.
+ */
 function renderChoreList() {
     const list = document.getElementById("choreList");
     const searchTerm = (document.getElementById("searchInput").value || "").toLowerCase();
@@ -157,6 +225,13 @@ function renderChoreList() {
     }
 }
 
+/**
+ * Highlights the selected chore from a list of chores by adding the "selected" class
+ * to the corresponding list item. Clears the "selected" class from all other list items.
+ * The selected chore is determined based on a comparison of its ID with the `selectedChoreId`.
+ *
+ * @return {void} Does not return any value.
+ */
 function highlightSelectedChore() {
     const items = document.querySelectorAll(".chore-list-item");
     items.forEach(item => item.classList.remove("selected"));
@@ -175,12 +250,22 @@ function highlightSelectedChore() {
 // ADD POINTS MODAL
 // ===============================
 
+/**
+ * Opens the "Add Points" modal by making it visible and resetting the input value to an empty string.
+ *
+ * @return {void} Does not return a value.
+ */
 function openAddPointsModal() {
     const modal = document.getElementById("addPointsModal");
     document.getElementById("addPointsValue").value = "";
     modal.classList.remove("hidden");
 }
 
+/**
+ * Closes the "Add Points" modal by adding a "hidden" class to its element.
+ *
+ * @return {void} This method does not return any value.
+ */
 function closeAddPointsModal() {
     document.getElementById("addPointsModal").classList.add("hidden");
 }
@@ -228,6 +313,31 @@ document.getElementById("addPointsConfirm")?.addEventListener("click", async () 
 // ---------------------------------------------------------------
 // FORM LOADING / NEW CHORE
 // ---------------------------------------------------------------
+/**
+ * Populates the chore editing form with the data from the provided chore object and updates the UI elements accordingly.
+ *
+ * @param {Object} chore The chore object containing the data to be loaded into the form.
+ * @param {string} [chore.id] The unique identifier of the chore.
+ * @param {string} [chore.name] The name of the chore.
+ * @param {string} [chore.description] A description of the chore.
+ * @param {number} [chore.value=1] The value or reward points associated with the chore.
+ * @param {boolean} [chore.spawn=true] Indicates whether the chore should regularly regenerate.
+ * @param {string} [chore.frequencyType="daily"] The type of frequency for the chore (e.g., daily, weekly).
+ * @param {number} [chore.customDays=1] The custom number of days for the frequency, if applicable.
+ * @param {string} [chore.afterChoreId] The ID of the chore that must be completed before this chore can be done.
+ * @param {number} [chore.weeklyDay=0] The day of the week (0-6) for weekly chores.
+ * @param {boolean} [chore.afterDinner=false] Indicates if it is an after-dinner chore.
+ * @param {string} [chore.cron] The cron expression for scheduling the chore.
+ * @param {boolean} [chore.inPool] Indicates if the chore is public and in the shared pool.
+ * @param {boolean} [chore.undesirable=false] Indicates if the chore is undesirable.
+ * @param {Array<string>} [chore.eligibleUsers] List of user IDs eligible for undesirable chores.
+ * @param {string} [chore.assignedTo] The user ID of the person assigned to the chore.
+ * @param {string} [chore.lastMarkedDate] The last date when the chore was marked as complete.
+ * @param {string} [chore.lastMarkedBy] The ID of the user who last marked the chore as complete.
+ * @param {number} [chore.timesMarkedOff=0] The total number of times the chore has been marked off.
+ *
+ * @return {void} This function does not return a value.
+ */
 function loadChoreIntoForm(chore) {
     const form = document.getElementById("choreForm");
     const noMsg = document.getElementById("noChoreSelectedMessage");
@@ -278,6 +388,12 @@ function loadChoreIntoForm(chore) {
     highlightSelectedChore();
 }
 
+/**
+ * Initializes the UI and internal state for adding a new chore.
+ * Resets relevant input fields, updates the form's visibility, and prepares the editor for creating a new chore.
+ *
+ * @return {void} This method does not return a value.
+ */
 function startNewChore() {
     selectedChoreId = null;
     isNewChore = true;
@@ -322,6 +438,14 @@ function startNewChore() {
 // ---------------------------------------------------------------
 // FREQUENCY / VISIBILITY / UNDESIRABLE UI
 // ---------------------------------------------------------------
+/**
+ * Updates the visibility of specific HTML elements based on the selected frequency type.
+ * The function evaluates the value of an element with the ID "frequencyType" and toggles
+ * the display style of related rows ("customDaysRow", "afterChoreRow", "weeklyDayRow", "cronField")
+ * accordingly.
+ *
+ * @return {void} Does not return a value.
+ */
 function updateFrequencyVisibility() {
     const freq = document.getElementById("frequencyType").value;
     const customRow = document.getElementById("customDaysRow");
@@ -335,6 +459,12 @@ function updateFrequencyVisibility() {
     cronRow.style.display   = (freq === "cron") ? "flex" : "none";
 }
 
+/**
+ * Renders a list of undesirable users with checkboxes, highlighting selected users.
+ *
+ * @param {string[]} selected - An array of usernames to be selected initially in the list.
+ * @return {void} Does not return a value.
+ */
 function renderUndesirableUserList(selected = []) {
     const container = document.getElementById("undesirableUsersContainer");
     if (!container) return;
@@ -360,6 +490,13 @@ function renderUndesirableUserList(selected = []) {
     });
 }
 
+/**
+ * Updates the display state of a visibility section based on the selected visibility option.
+ * Adjusts the visibility of an element (typically a row) depending on whether the visibility
+ * input is selected and its value.
+ *
+ * @return {void} This method does not return a value.
+ */
 function updateVisibilitySection() {
     const visRadio = document.querySelector("input[name='visibility']:checked");
     const row = document.getElementById("assignedToRow");
@@ -370,6 +507,13 @@ function updateVisibilitySection() {
     row.style.display = (visRadio.value === "assigned") ? "flex" : "none";
 }
 
+/**
+ * Refreshes the list of selectable after-chore options in a dropdown element.
+ * Updates the dropdown to exclude a specified chore and sorts the remaining chores alphabetically.
+ *
+ * @param {string|null} excludeId - The ID of the chore to exclude from the dropdown list. If null, no chore is excluded.
+ * @return {void} Does not return a value.
+ */
 function refreshAfterChoreOptions(excludeId = null) {
     const select = document.getElementById("afterChoreId");
     if (!select) return;
@@ -404,6 +548,11 @@ function refreshAfterChoreOptions(excludeId = null) {
     }
 }
 
+/**
+ * Toggles the visibility of the "undesirableUsersRow" element based on the checked state of the "undesirableCheckbox" element.
+ *
+ * @return {void} This function does not return a value.
+ */
 function updateUndesirableVisibility() {
     const isU = document.getElementById("undesirableCheckbox").checked;
     document.getElementById("undesirableUsersRow").style.display = isU ? "flex" : "none";
@@ -412,6 +561,14 @@ function updateUndesirableVisibility() {
 // ---------------------------------------------------------------
 // PAYLOAD BUILDER 
 // ---------------------------------------------------------------
+/**
+ * Constructs a chore payload object based on values from a form.
+ * The payload contains information such as chore ID, name, description,
+ * value, visibility settings, frequency type, and additional details
+ * relevant to chore scheduling and assignment.
+ *
+ * @return {Object} An object containing the payload for the chore, populated with values from form fields.
+ */
 function buildChorePayloadFromForm() {
     const id = document.getElementById("choreId").value.trim();
     const name = document.getElementById("choreName").value.trim();
@@ -472,6 +629,14 @@ function buildChorePayloadFromForm() {
 // ---------------------------------------------------------------
 // SAVE CHORE (FORM SUBMIT)
 // ---------------------------------------------------------------
+/**
+ * Handles the form submission event for saving a chore. Validates the input data,
+ * constructs the chore payload, sends it to the server, and updates the UI upon success.
+ * Displays relevant error messages for validation or server errors.
+ *
+ * @param {Event} event - The form submission event.
+ * @return {Promise<void>} Resolves when the chore has been successfully saved and the UI updated.
+ */
 async function onFormSubmit(event) {
     event.preventDefault();
 
@@ -560,6 +725,17 @@ async function onFormSubmit(event) {
 // ---------------------------------------------------------------
 // DELETE CHORE
 // ---------------------------------------------------------------
+/**
+ * Handles the deletion of a chore by its identifier. Prompts the user for confirmation
+ * before proceeding to delete the chore, removes the chore from the system, and updates
+ * the user interface accordingly. This also removes associated statistics from user files.
+ *
+ * The method interacts with a backend service for deletion, handles error scenarios,
+ * and ensures the UI reflects the updated state after successful deletion.
+ *
+ * @return {Promise<void>} Resolves when the chore is successfully deleted and the UI is updated.
+ * Rejects and logs an error if the deletion or subsequent operations fail.
+ */
 async function onDeleteChore() {
     const id = document.getElementById("choreId").value.trim();
     if (!id) {
@@ -610,6 +786,16 @@ async function onDeleteChore() {
 // ---------------------------------------------------------------
 // RESET STATS 
 // ---------------------------------------------------------------
+/**
+ * Resets the statistics for a specific chore, including last marked date,
+ * user who last marked it, and the count of times it has been marked off.
+ * Prompts the user for confirmation before proceeding. Constructs and submits
+ * a payload to update the chore with the default stats and other properties.
+ * Refreshes the chore data upon success to reflect the changes.
+ *
+ * @return {Promise<void>} A promise that resolves once the chore statistics
+ *         have been reset and data reloaded, or rejects if an error occurs during the operation.
+ */
 async function onResetStats() {
     const id = document.getElementById("choreId").value.trim();
     if (!id) {
@@ -708,6 +894,12 @@ const payload = {
 // ---------------------------------------------------------------
 // RESET ALL POINTS
 // ---------------------------------------------------------------
+/**
+ * Resets the weekly points and optionally increments the streak if all chores were completed.
+ * Prompts the user to confirm the reset and, if applicable, increments the streak before resetting points.
+ *
+ * @return {Promise<void>} A promise that resolves once the points have been reset and appropriate actions have been completed.
+ */
 async function resetPoints() {
     if (!confirm("Reset all weekly points?")) return;
 
@@ -754,6 +946,14 @@ async function resetPoints() {
 // ---------------------------------------------------------------
 // SKIP & UNDO
 // ---------------------------------------------------------------
+/**
+ * Skips the currently selected chore by marking it as done for the day without providing any credit.
+ * Prompts the user for confirmation before proceeding. Sends a request to the server to skip the chore
+ * and reloads the list of chores upon successful completion. Handles errors or invalid server responses.
+ *
+ * @return {Promise<void>} Resolves when the chore is successfully skipped and the list of chores is reloaded.
+ *                         If an error occurs, displays an appropriate alert message.
+ */
 async function skipSelectedChore() {
     if (!selectedChoreId) {
         alert("No chore selected.");
@@ -783,6 +983,13 @@ async function skipSelectedChore() {
     }
 }
 
+/**
+ * Undoes the last completion for the currently selected chore.
+ * If no chore is selected or the operation is not confirmed by the user, the process is aborted.
+ * Communicates with the server to revert the chore's completion status, and reloads the chore list upon success.
+ *
+ * @return {Promise<void>} A promise that resolves once the chore undo operation completes and the chore list is reloaded, or rejects if an error occurs.
+ */
 async function undoSelectedChore() {
     if (!selectedChoreId) {
         alert("No chore selected.");
