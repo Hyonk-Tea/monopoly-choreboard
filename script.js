@@ -370,6 +370,21 @@ async function loadStreak() {
     }
 }
 
+function formatFrequency(chore) {
+    switch (chore.frequencyType) {
+        case "daily": return "Daily";
+        case "weekly": return "Weekly";
+        case "monthly": return "Monthly";
+        case "custom": return `Every ${chore.customDays ?? "?"} days`;
+        case "after": {
+            const parent = choresById[chore.afterChoreId];
+            return `After: ${parent ? parent.name : chore.afterChoreId}`;
+        }
+        case "cron": return `Cron: ${chore.cron || ""}`;
+        default: return "Unknown";
+    }
+}
+
 
 // ---------------------------------------------------------------
 // RENDER CHORES (POOL)
