@@ -3,13 +3,77 @@ console.log("%c[ChoreBoard] Starting script.js...", "color:#9cf; font-weight:bol
 // ---------------------------------------------------------------
 // CONSTANTS & GLOBAL STATE
 // ---------------------------------------------------------------
+/**
+ * An array containing a predefined list of user names.
+ *
+ * This list is immutable and used for scenarios where a specific set
+ * of user identifiers is required, such as testing, data population,
+ * or lookup operations. The names in this array are represented as
+ * strings and serve as unique identifiers for each user.
+ *
+ * Variable properties:
+ * - Type: Array of strings
+ * - Purpose: Stores a fixed list of user identifiers
+ * - Allowed Values: Predefined human-readable names
+ */
 const USERS = ["ash", "vast", "sephy", "hope", "cylis", "phil", "selina"];
+/**
+ * A constant variable representing the base path for an API.
+ *
+ * This variable can be used as the foundational endpoint for building relative paths to API resources.
+ * It helps in maintaining consistency and centralizing the base API path configuration.
+ *
+ * @constant {string}
+ */
 const API_BASE = "api";
 
+/**
+ * Represents a list of all chores.
+ * Can be used to store and manage chores or tasks within an application.
+ *
+ * @type {Array}
+ */
 let allChores = [];
+/**
+ * An object that acts as a container to store chores,
+ * where each chore is keyed by a unique identifier.
+ *
+ * This variable allows easy and direct access to individual
+ * chores using their respective ID as the key.
+ *
+ * The keys are expected to be unique identifiers (e.g., strings or numbers),
+ * and the associated values can represent the details of the chore
+ * (e.g., an object or data structure containing the description,
+ * status, priority, etc.).
+ */
 let choresById = {};
+/**
+ * Represents the currently selected chore within a chore tracking or task management system.
+ * This variable holds an object or identifier indicating the user's selected chore.
+ * It may initially be set to null when no chore is selected.
+ *
+ * @type {Object|null}
+ */
 let selectedChore = null;
+/**
+ * A set object representing the currently selected user(s).
+ * This variable can hold unique user identifiers or user-related objects.
+ * It is initialized as an empty set and can be modified to add or remove users dynamically.
+ */
 let selectedUser = new Set();
+/**
+ * Represents the most recent error encountered during execution.
+ * This variable is used to store error information for debugging
+ * or error-handling purposes.
+ *
+ * The value is initially set to null and can be updated with
+ * error objects or messages when an error occurs.
+ *
+ * Expected to be cleared or reset as part of proper error-handling workflow
+ * to ensure it doesn't hold stale error information.
+ *
+ * @type {Error | string | null}
+ */
 let lastError = null;
 
 console.log(
@@ -32,6 +96,12 @@ fetch("api/debug_time.php")
 // ---------------------------------------------------------------
 // TOP BANNER (ERROR / POINTS)
 // ---------------------------------------------------------------
+/**
+ * Retrieves the existing banner with the ID "topBanner" or creates and returns a new banner element
+ * if it does not already exist. The new banner is styled and added to the top of the document body.
+ *
+ * @return {HTMLDivElement} The existing or newly created banner element.
+ */
 function getOrCreateBanner() {
     let banner = document.getElementById("topBanner");
     if (!banner) {
@@ -50,6 +120,12 @@ function getOrCreateBanner() {
     return banner;
 }
 
+/**
+ * Displays an error banner with the provided error message.
+ *
+ * @param {string} message - The error message to display on the banner.
+ * @return {void} This function does not return a value.
+ */
 function showErrorBanner(message) {
     lastError = message;
     console.error("[ChoreBoard ERROR]", message);
@@ -59,10 +135,22 @@ function showErrorBanner(message) {
     banner.textContent = message;
 }
 
+/**
+ * Clears the last encountered error by setting the lastError variable to null.
+ *
+ * @return {void} This method does not return a value.
+ */
 function clearError() {
     lastError = null;
 }
 
+/**
+ * Displays a banner with user points and changes the appearance based on specific conditions.
+ *
+ * @param {Object} pointsMap - A mapping of users to their points and meta-information.
+ *        This object includes an optional `_meta` property with metadata like `lastReset`.
+ * @return {void} This function does not return a value.
+ */
 function showPointsBanner(pointsMap) {
     if (lastError) return; // don't override error banners
 
@@ -91,6 +179,14 @@ function showPointsBanner(pointsMap) {
 // ---------------------------------------------------------------
 // SAFE JSON PARSE 
 // ---------------------------------------------------------------
+/**
+ * Safely parses a JSON string, attempting to recover from initial parsing errors by stripping leading noise
+ * before retrying the parse. Logs warnings and errors to provide context for failures.
+ *
+ * @param {string} raw - The raw JSON string to parse.
+ * @param {string} contextLabel - Contextual label for logging purposes, indicating the source or intent of the JSON data.
+ * @return {*} Returns the parsed JavaScript object or value if successful. Will throw an error and log issues if parsing fails.
+ */
 function safeJsonParse(raw, contextLabel) {
     try {
         return JSON.parse(raw);
@@ -137,9 +233,32 @@ document.addEventListener("DOMContentLoaded", () => {
 // SECRET PIANO TILES GAME
 // ---------------------------------------------------------------
 
+/**
+ * Tracks the number of times a banner has been tapped.
+ * This variable is used to keep count of user interactions with the banner.
+ * It is initialized to 0 and can be incremented as needed.
+ *
+ * @type {number}
+ */
 let bannerTapCount = 0;
+/**
+ * Tracks the timestamp of the last interaction with a banner element.
+ * This variable is initialized to 0 and is typically updated with the
+ * current timestamp (in milliseconds) whenever a user taps or interacts
+ * with the banner. It can be used to implement functionality like
+ * throttling interactions or detecting double-tap gestures.
+ *
+ * @type {number}
+ */
 let bannerLastTap = 0;
 
+/**
+ * Enables a triple-tap functionality on the banner element.
+ * When the banner is triple-tapped within a short time interval, it navigates to a specified URL.
+ * The method ensures that text selection, highlighting, and accidental scrolls are prevented during interaction.
+ *
+ * @return {void} Does not return any value.
+ */
 function enableBannerTripleTap() {
     const banner = getOrCreateBanner();
     if (!banner) {
@@ -195,6 +314,14 @@ document.addEventListener("DOMContentLoaded", enableBannerTripleTap);
 // ---------------------------------------------------------------
 // DATE DISPLAY
 // ---------------------------------------------------------------
+/**
+ * Initializes the date display by setting the text content of the HTML element
+ * with the ID "dateDisplay" to the current date in a formatted string. If the
+ * element is not found or an error occurs during formatting, appropriate warnings
+ * or error messages are logged to the console.
+ *
+ * @return {void} Does not return a value.
+ */
 function initDateDisplay() {
     const el = document.getElementById("dateDisplay");
     if (!el) {
@@ -220,6 +347,17 @@ function initDateDisplay() {
 // ---------------------------------------------------------------
 // FETCH CHORES
 // ---------------------------------------------------------------
+/**
+ * Asynchronously fetches and loads the list of chores from the server, updating local chore data structures.
+ * Handles network errors, invalid JSON responses, and server-side format issues.
+ * If certain conditions are met (e.g., expired claims), resets chore assignments
+ * and saves the updated list back to the server.
+ * Triggers re-rendering of UI components like the chore list, assigned chores, and points system.
+ *
+ * @return {Promise<void>} A promise that resolves once the chores are successfully loaded
+ * and UI updates are triggered. If an error occurs, appropriate error messages are logged,
+ * and UI error banners are displayed.
+ */
 async function loadChores() {
     console.log("%c[ChoreBoard] Fetching chores...", "color:#9cd");
 
@@ -307,6 +445,14 @@ if (changed) {
 // ---------------------------------------------------------------
 // FETCH POINTS
 // ---------------------------------------------------------------
+/**
+ * Loads points data from the server and processes the response for further use.
+ * The method handles network requests, parses received data, and updates the relevant UI components
+ * or triggers related functionality. In the event of failures, appropriate error messages are logged
+ * and displayed.
+ *
+ * @return {Promise<void>} A Promise that resolves when the points data is successfully loaded and processed, or rejects with no return value in case of errors.
+ */
 async function loadPoints() {
     console.log("%c[ChoreBoard] Fetching points...", "color:#ffb");
 
@@ -355,6 +501,12 @@ async function loadPoints() {
     loadStreak();
 }
 
+/**
+ * Loads the current streak data from the server and updates the DOM element
+ * with the retrieved streak value.
+ *
+ * @return {Promise<void>} A promise that resolves when the streak has been successfully loaded and updated in the DOM.
+ */
 async function loadStreak() {
     try {
         const res = await fetch(`${API_BASE}/get_streak.php?ts=${Date.now()}`);
@@ -389,6 +541,14 @@ function formatFrequency(chore) {
 // ---------------------------------------------------------------
 // RENDER CHORES (POOL)
 // ---------------------------------------------------------------
+/**
+ * Renders a list of chores onto the page. It filters visible chores based on specific criteria
+ * such as public visibility, spawning status, and whether they are due or overdue. The method
+ * sorts the chores by value and name, clears the existing chore grid, and updates the DOM to
+ * display the visible chores. If no chores match the criteria, a "no chores" message is displayed.
+ *
+ * @return {void} This method does not return any value. It performs DOM updates to display chores.
+ */
 function renderChores() {
     const grid = document.getElementById("choreGrid");
     const noMsg = document.getElementById("noChoresMessage");
@@ -512,6 +672,13 @@ function renderChores() {
 // ---------------------------------------------------------------
 // RENDER ASSIGNED CHORES
 // ---------------------------------------------------------------
+/**
+ * Renders the list of assigned chores for each user in the "assignedChoreSection" container.
+ * Filters and organizes chores based on assignment, frequency, and their current status (due or overdue).
+ * Generates the necessary UI components for each user and chore, including details and a button to mark completion.
+ *
+ * @return {void} Does not return a value. This method manipulates the DOM by appending chore UI elements to the designated container.
+ */
 function renderAssignedChores() {
     const container = document.getElementById("assignedChoreSection");
     if (!container) return;
@@ -611,16 +778,43 @@ function renderAssignedChores() {
 // ---------------------------------------------------------------
 // CRON / FREQUENCY LOGIC
 // ---------------------------------------------------------------
+/**
+ * Represents a mapping of month abbreviations to their corresponding numeric values.
+ * This variable is typically used for cron job scheduling or other time-related functionality.
+ *
+ * Keys are three-letter abbreviations of months (e.g., "JAN" for January).
+ * Values are the numeric representations of those months, where January is 1 and December is 12.
+ */
 const CRON_MONTHS = {
     "JAN": 1, "FEB": 2, "MAR": 3, "APR": 4, "MAY": 5, "JUN": 6,
     "JUL": 7, "AUG": 8, "SEP": 9, "OCT": 10, "NOV": 11, "DEC": 12
 };
 
+/**
+ * Represents the mapping of days of the week to their respective numerical values
+ * used in CRON expressions. These values typically range from 0 (Sunday) to 6 (Saturday).
+ *
+ * Properties:
+ * - `SUN`: Corresponds to Sunday with a value of 0.
+ * - `MON`: Corresponds to Monday with a value of 1.
+ * - `TUE`: Corresponds to Tuesday with a value of 2.
+ * - `WED`: Corresponds to Wednesday with a value of 3.
+ * - `THU`: Corresponds to Thursday with a value of 4.
+ * - `FRI`: Corresponds to Friday with a value of 5.
+ * - `SAT`: Corresponds to Saturday with a value of 6.
+ */
 const CRON_DAYS = {
     "SUN": 0, "MON": 1, "TUE": 2, "WED": 3,
     "THU": 4, "FRI": 5, "SAT": 6
 };
 
+/**
+ * Checks whether a given cron expression matches the specified date.
+ *
+ * @param {string} expr - The cron expression to evaluate. It should consist of five fields: minute, hour, day of the month, month, and day of the week.
+ * @param {Date} date - The date object against which the cron expression will be matched.
+ * @return {boolean} Returns true if the cron expression matches the specified date, otherwise false.
+ */
 function doesCronMatchToday(expr, date) {
     if (!expr) return false;
 
@@ -656,6 +850,17 @@ return (
 
 }
 
+/**
+ * Evaluates whether a given cron field matches the provided value based on specified constraints and cron syntax.
+ *
+ * @param {string} field The cron field to evaluate. It may include symbols such as "*", ",", "-", "/", or special strings for months, days of the week, or specific modifiers.
+ * @param {number} value The numeric value to compare against the cron field.
+ * @param {number} min The minimum allowed value for the cron field.
+ * @param {number} max The maximum allowed value for the cron field.
+ * @param {Date} date A `Date` object used for handling date-specific cron syntax such as week or month-based rules.
+ * @param {string|null} [type=null] The type of the cron field being evaluated. Options may include "MONTH", "DOW" (day of week), or "DOM" (day of month). Defaults to null.
+ * @return {boolean} Returns `true` if the value matches the cron field under the given constraints; otherwise `false`.
+ */
 function cronFieldMatches(field, value, min, max, date, type = null) {
     field = field.toUpperCase().trim();
 
@@ -729,6 +934,15 @@ function cronFieldMatches(field, value, min, max, date, type = null) {
 }
 
 // Nearest weekday (DOM W)
+/**
+ * Determines if the given date matches the nearest weekday (Monday to Friday)
+ * to a specified day of the month.
+ *
+ * @param {Date} date - The date to be checked.
+ * @param {number} targetDay - The day of the month to compare against.
+ * @return {boolean} Returns true if the given date matches the nearest weekday
+ * to the specified day of the month; otherwise, returns false.
+ */
 function isNearestWeekday(date, targetDay) {
     const month = date.getMonth();
     const year = date.getFullYear();
@@ -751,6 +965,16 @@ function isNearestWeekday(date, targetDay) {
 }
 
 // DOW#N — nth weekday of month
+/**
+ * Determines whether a given date falls on the nth occurrence of a specific
+ * weekday within its month.
+ *
+ * @param {Date} date The date to check.
+ * @param {number} targetDow The target day of the week (0 for Sunday, 1 for Monday, ..., 6 for Saturday).
+ * @param {number} n The nth occurrence of the specified weekday in the month.
+ * @return {boolean} True if the date is the nth occurrence of the specified weekday
+ * in its month, otherwise false.
+ */
 function isNthWeekdayOfMonth(date, targetDow, n) {
     const month = date.getMonth();
     const year = date.getFullYear();
@@ -770,6 +994,13 @@ function isNthWeekdayOfMonth(date, targetDow, n) {
 }
 
 // Last weekday of type in month (like 5L = last Friday)
+/**
+ * Checks if the given date is the last occurrence of the specified day of the week (targetDow) in its month.
+ *
+ * @param {Date} date - The date to be checked.
+ * @param {number} targetDow - The target day of the week (0 for Sunday, 1 for Monday, ..., 6 for Saturday).
+ * @return {boolean} Returns true if the date is the last occurrence of the target day of the week in the month; otherwise, false.
+ */
 function isLastWeekdayOfMonth(date, targetDow) {
     const month = date.getMonth();
     const year = date.getFullYear();
@@ -787,6 +1018,13 @@ function isLastWeekdayOfMonth(date, targetDow) {
 // ---------------------------------------------------------------
 // CHORE STATUS 
 // ---------------------------------------------------------------
+/**
+ * Checks if a chore has been completed today.
+ *
+ * @param {Object} chore - An object representing the chore, which includes a lastMarkedDate property.
+ * @param {string} todayStr - A string representing today's date in the appropriate format.
+ * @return {boolean} Returns true if the chore's lastMarkedDate matches today's date, otherwise false.
+ */
 function isDoneToday(chore, todayStr) {
     return chore.lastMarkedDate === todayStr;
 }
@@ -794,6 +1032,16 @@ function isDoneToday(chore, todayStr) {
 // ---------------------------------------------------------------
 // COMPUTE CHORE STATUS
 // ---------------------------------------------------------------
+/**
+ * Computes the status of a chore, determining whether it is due or overdue based on its frequency type, last completed date, and related data.
+ *
+ * @param {Object} chore - The chore object, containing metadata such as frequencyType, lastMarkedDate, cronSpawnedDate, and related properties.
+ * @param {Date} today - The current date object representing today's date.
+ * @param {string} todayStr - A string representation of today's date in the format "YYYY-MM-DD".
+ * @return {Object} An object indicating the chore's status with the following properties:
+ *                  - due (boolean): Whether the chore is due.
+ *                  - overdue (boolean): Whether the chore is overdue.
+ */
 function computeChoreStatus(chore, today, todayStr) {
     const freqRaw = chore.frequencyType || "daily";
     const freq = String(freqRaw).trim().toLowerCase();
@@ -899,6 +1147,12 @@ function computeChoreStatus(chore, today, todayStr) {
 // ---------------------------------------------------------------
 // DATE UTILS
 // ---------------------------------------------------------------
+/**
+ * Converts a Date object to a string formatted as 'YYYY-MM-DD HH:MM'.
+ *
+ * @param {Date} date - The Date object to be formatted.
+ * @return {string} A string representing the formatted date and time in the format 'YYYY-MM-DD HH:MM'.
+ */
 function toYMDHM(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -908,6 +1162,12 @@ function toYMDHM(date) {
     return `${y}-${m}-${d} ${hh}:${mm}`; // matches PHP 'Y-m-d H:i'
 }
 
+/**
+ * Converts a given Date object to a string in the "YYYY-MM-DD" format.
+ *
+ * @param {Date} date - The Date object to format.
+ * @return {string} A string representing the date in "YYYY-MM-DD" format.
+ */
 function toYMD(date) {
     const y = date.getFullYear();
     const m = String(date.getMonth() + 1).padStart(2, "0");
@@ -915,11 +1175,24 @@ function toYMD(date) {
     return `${y}-${m}-${d}`;
 }
 
+/**
+ * Parses a date string in the format "YYYY-MM-DD" and returns a Date object.
+ *
+ * @param {string} str - The date string to parse, formatted as "YYYY-MM-DD".
+ * @return {Date} A Date object representing the parsed year, month, and day.
+ */
 function parseYMD(str) {
     const [y, m, d] = str.split("-").map(Number);
     return new Date(y, m - 1, d);
 }
 
+/**
+ * Calculates the difference in days between two Date objects.
+ *
+ * @param {Date} a The first date.
+ * @param {Date} b The second date.
+ * @return {number} The difference in days between the two dates.
+ */
 function dateDiffInDays(a, b) {
     const ms = 1000 * 60 * 60 * 24;
     const utcA = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
@@ -930,6 +1203,16 @@ function dateDiffInDays(a, b) {
 // ---------------------------------------------------------------
 // USER MODAL
 // ---------------------------------------------------------------
+/**
+ * Initializes the user modal by setting up buttons for user selection,
+ * handling the modal's confirm and cancel actions, and dynamically attaching event listeners.
+ *
+ * This method populates the user modal with buttons corresponding to each user,
+ * associates event listeners for selecting users, and manages the functionality of
+ * cancel and confirm buttons to handle chore assignments based on the user selections.
+ *
+ * @return {void} Does not return a value. Outputs error messages in the console if the expected elements are not found.
+ */
 function initUserModal() {
     const modal = document.getElementById("userModal");
     if (!modal) {
@@ -986,6 +1269,14 @@ if (confirmBtn) {
     updateConfirmButtonState();
 }
 
+/**
+ * Opens the user selection modal for the specified chore. This function updates the modal UI
+ * with the chore's name, resets user selections and claim checkbox, and ensures the modal
+ * is displayed correctly.
+ *
+ * @param {Object} chore - The chore object containing details of the selected chore.
+ * @return {void} This function does not return a value.
+ */
 function openUserModal(chore) {
     selectedChore = chore;
     selectedUser = new Set();
@@ -1012,6 +1303,15 @@ function openUserModal(chore) {
 }
 
 
+/**
+ * Closes the user modal by performing the following actions:
+ * - Resets the selected chore to null.
+ * - Clears the selected user data by initializing a new Set.
+ * - Invokes functions to clear user selection and update the confirm button state.
+ * - Hides the modal element with the ID "userModal" by adding the "hidden" class.
+ *
+ * @return {void} Does not return any value.
+ */
 function closeUserModal() {
     selectedChore = null;
     selectedUser = new Set();
@@ -1023,6 +1323,13 @@ function closeUserModal() {
     if (modal) modal.classList.add("hidden");
 }
 
+/**
+ * Selects or deselects a user by updating the selection status and visual state of a button.
+ *
+ * @param {HTMLElement} btn - The button element associated with the user.
+ * @param {string} username - The username of the user to toggle selection status for.
+ * @return {void} This function does not return a value.
+ */
 function selectUser(btn, username) {
     // Toggle this user in the Set
     if (selectedUser.has(username)) {
@@ -1038,12 +1345,24 @@ function selectUser(btn, username) {
 
 
 
+/**
+ * Clears the current user selection by resetting the selected user set
+ * and removing the "selected" class from all user buttons.
+ *
+ * @return {void} This method does not return any value.
+ */
 function clearUserSelection() {
     selectedUser = new Set();
     document.querySelectorAll(".user-button").forEach(b => b.classList.remove("selected"));
 }
 
 
+/**
+ * Updates the state of the confirm button based on whether a user is selected.
+ * The button is disabled if no user is selected.
+ *
+ * @return {void} This method does not return a value.
+ */
 function updateConfirmButtonState() {
     const btn = document.getElementById("confirmUserSelect");
     if (btn) btn.disabled = selectedUser.size === 0;
@@ -1053,6 +1372,13 @@ function updateConfirmButtonState() {
 // ---------------------------------------------------------------
 // MARK CHORE COMPLETE
 // ---------------------------------------------------------------
+/**
+ * Marks a chore as completed for a selected user or group of users.
+ *
+ * @param {Object} chore The chore to be marked as completed, containing its ID and associated details.
+ * @param {string} _ignoredUser This parameter is ignored and holds no functionality within the method.
+ * @return {Promise<void>} A promise that resolves when the chore is successfully marked or fails due to an error.
+ */
 async function markChore(chore, _ignoredUser) {
     console.log("%c[ChoreBoard] Marking chore:", "color:#dd0", chore, Array.from(selectedUser));
 
@@ -1114,6 +1440,16 @@ async function markChore(chore, _ignoredUser) {
 // ---------------------------------------------------------------
 // CLAIM CHORE 
 // ---------------------------------------------------------------
+/**
+ * Claims a chore for a specified user. This function ensures that exactly one user
+ * is selected and communicates with the server to claim the chore. Handles various
+ * errors such as network issues, server response parsing errors, and invalid
+ * chore claiming attempts.
+ *
+ * @param {Object} chore - The chore object to be claimed, containing at least an `id` property.
+ * @param {Set<string>} selectedUserSet - A set of selected users from which exactly one user must claim the chore.
+ * @return {Promise<void>} A promise that resolves once the process is complete, or early exits on failure.
+ */
 async function claimChore(chore, selectedUserSet) {
     const users = Array.from(selectedUserSet);
 

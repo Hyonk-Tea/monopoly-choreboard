@@ -7,6 +7,12 @@ date_default_timezone_set('America/Chicago');
  * Daily logger — readable output into /data/logs/YYYY-MM-DD.txt
  */
 if (!function_exists('log_event')) {
+    /**
+     * Logs a message to a daily log file with a timestamp.
+     *
+     * @param string $msg The message to be logged.
+     * @return void
+     */
     function log_event($msg) {
         $logDir = __DIR__ . '/../data/logs';
 
@@ -22,7 +28,16 @@ if (!function_exists('log_event')) {
 }
 
 /**
- * MAIN CHECK
+ * Checks whether a given cron expression matches the current date and time.
+ *
+ * The method evaluates a cron expression consisting of five fields: minute, hour,
+ * day of the month, month, and day of the week. It determines if the current time
+ * as represented by the provided DateTime object matches the given cron expression.
+ *
+ * @param string $expr The cron expression to evaluate. It should consist of five space-separated fields.
+ * @param DateTime $now The DateTime object representing the current time to compare against the cron expression.
+ *
+ * @return bool Returns true if the current time matches the cron expression; false otherwise.
  */
 function doesCronMatchToday($expr, DateTime $now) {
     if (!$expr) {
@@ -79,9 +94,14 @@ function doesCronMatchToday($expr, DateTime $now) {
 }
 
 
-/******************************************************************
- * GENERIC FIELD MATCHER
- ******************************************************************/
+/**
+ * Checks if a given `value` matches a cron field expression.
+ *
+ * @param string $field The cron field expression to evaluate. It can contain:
+ *                      - A wildcard '*' to match any value.
+ *                      - A list like '1,5,10' to match any of the specified values.
+ *                      - A range like '5-10' to match any value within the range.
+ *                      - A step like '*/
 function cronMatchField($field, $value, DateTime $now) {
     $field = trim($field);
     $value = intval($value);
@@ -120,9 +140,13 @@ function cronMatchField($field, $value, DateTime $now) {
 }
 
 
-/******************************************************************
- * DAY OF MONTH MATCH
- ******************************************************************/
+/**
+ * Determines if the current day of the month matches the provided cron expression field.
+ *
+ * @param string $field The cron expression field specific to the day of the month (e.g., "15W", "L", or "LW").
+ * @param DateTime $now The current date and time used for evaluation.
+ * @return bool Returns true if the day of the month matches the cron expression, otherwise false.
+ */
 function cronMatchDom($field, DateTime $now) {
     $field = trim($field);
 
@@ -162,9 +186,14 @@ function cronMatchDom($field, DateTime $now) {
 }
 
 
-/******************************************************************
- * DAY OF WEEK MATCH 
- ******************************************************************/
+/**
+ * Checks if the given cron day-of-week field matches the current day of the week.
+ *
+ * @param string $field The cron day-of-week expression (e.g., "5L" for last Friday, "2#1" for the first Tuesday).
+ * @param DateTime $now The current date and time.
+ *
+ * @return bool True if the field matches the current day of the week, otherwise false.
+ */
 function cronMatchDow($field, DateTime $now) {
     $field = trim($field);
     $dow   = intval($now->format('w'));

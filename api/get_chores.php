@@ -7,6 +7,12 @@ date_default_timezone_set('America/Chicago');
  * Simple daily logger -> data/logs/YYYY-MM-DD.txt
  */
 if (!function_exists('log_event')) {
+    /**
+     * Logs an event message to a daily log file.
+     *
+     * @param string $msg The message to be logged.
+     * @return void
+     */
     function log_event($msg) {
         $logDir = __DIR__ . '/../data/logs';
         if (!is_dir($logDir)) {
@@ -20,6 +26,15 @@ if (!function_exists('log_event')) {
     }
 }
 
+/**
+ * Represents the file path or object containing details about chores.
+ *
+ * This variable is used to store or reference data pertaining to chores,
+ * such as their descriptions, deadlines, or associated statuses.
+ * The exact type and structure of the content depend on implementation.
+ *
+ * @var mixed The file path as a string or an object containing chore-related data.
+ */
 $choreFile = __DIR__ . '/../data/chores.json';
 
 if (!file_exists($choreFile)) {
@@ -28,7 +43,23 @@ if (!file_exists($choreFile)) {
     exit;
 }
 
+/**
+ * Represents the raw input or unprocessed data.
+ *
+ * This variable is typically used to store original data in its
+ * unaltered form before it undergoes any processing or validation.
+ *
+ * @var mixed $raw Can hold any type of data, such as string, array, or object,
+ *                 depending on the context in which it is used.
+ */
 $raw = file_get_contents($choreFile);
+/**
+ * An array representing a list of tasks or duties to be completed.
+ * Each element in the array is expected to be a description of a specific chore.
+ *
+ * This variable is typically used to track and manage household or personal responsibilities.
+ * It can be dynamically modified to add, remove, or update chores as needed.
+ */
 $chores = json_decode($raw, true);
 
 if (!is_array($chores)) {
@@ -37,7 +68,23 @@ if (!is_array($chores)) {
     exit;
 }
 
+/**
+ * A string representation of the current date.
+ *
+ * The variable stores a formatted representation of the current date,
+ * which can be used for display, logging, or other date-related purposes.
+ *
+ * @var string
+ */
 $todayStr = date('Y-m-d');
+/**
+ * Indicates whether a specific resource, entity, or value has been modified.
+ *
+ * This boolean variable is typically used to track the state of a change,
+ * allowing for conditional logic to execute based on whether or not any
+ * modifications have occurred. The value of `true` denotes that a change
+ * has been made, whereas `false` signifies no alterations.
+ */
 $changed  = false;
 
 foreach ($chores as &$c) {
@@ -58,6 +105,15 @@ foreach ($chores as &$c) {
         }
     }
 }
+/**
+ * A variable to store a specific value.
+ *
+ * The purpose of this variable depends on the context in which it is used.
+ * It could hold various types of data such as integers, strings, arrays, or objects.
+ * Ensure to verify its type and contents before usage.
+ *
+ * @var mixed The value assigned to this variable.
+ */
 unset($c);
 
 if ($changed) {
