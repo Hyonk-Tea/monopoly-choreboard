@@ -9,6 +9,28 @@ body {
     color: #eee;
 }
 
+/* Top banner (points/errors) */
+#topBanner {
+    padding: 8px 10px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10000;
+    border-bottom: 1px solid #333;
+    background: #181818; /* default background */
+    color: #eee;
+}
+#topBanner.warn {
+    background: #a33;
+    color: #fff;
+}
+#topBanner.error {
+    background: #922;
+    color: #fff;
+}
+
 header {
     padding: 1rem;
     background: #222;

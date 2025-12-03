@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chore Manager — Pool</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        window.PAGE_MODE = 'pool';
+        window.PAGE_USER = null;
+    </script>
+    <style>
+        /* Optional: small hint nav */
+        .top-nav { display:flex; gap:.5rem; flex-wrap:wrap; justify-content:center; margin: .5rem 0; }
+        .top-nav a { font-size:.9rem; color:#06c; text-decoration:none; padding:.15rem .4rem; border-radius:.25rem; }
+        .top-nav a:hover { background:#eef; }
+    </style>
+    </head>
+<body>
+
+    <main>
+        <div id="choreGrid" class="chore-grid"></div>
+        <div id="noChoresMessage" class="hidden">No chores due right now. GGs!</div>
+    </main>
+
+    <!-- User selection modal -->
+    <div id="userModal" class="modal hidden">
+        <div class="modal-content">
+            <h2>Who completed this chore?</h2>
+            <p id="modalChoreName"></p>
+            <div id="userButtons" class="user-buttons"></div>
+            <div class="form-row inline" style="margin: 0.5rem 0;">
+                <label style="font-size: 0.85rem;">
+                    <input type="checkbox" id="claimCheckbox">
+                    Claim (assign to user, don't complete yet)
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button id="cancelUserSelect">Cancel</button>
+                <button id="confirmUserSelect" disabled>OK</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>

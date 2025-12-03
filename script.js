@@ -76,6 +76,10 @@ let selectedUser = new Set();
  */
 let lastError = null;
 
+// Page context (set by each HTML page)
+const PAGE_MODE = (typeof window !== 'undefined' && window.PAGE_MODE) ? String(window.PAGE_MODE) : 'pool';
+const PAGE_USER = (typeof window !== 'undefined' && window.PAGE_USER) ? String(window.PAGE_USER) : null;
+
 console.log(
     "[ChoreBoard Time]",
     "Local:", new Date().toString(),
@@ -103,21 +107,8 @@ fetch("api/debug_time.php")
  * @return {HTMLDivElement} The existing or newly created banner element.
  */
 function getOrCreateBanner() {
-    let banner = document.getElementById("topBanner");
-    if (!banner) {
-        banner = document.createElement("div");
-        banner.id = "topBanner";
-        banner.style.padding = "8px 10px";
-        banner.style.textAlign = "center";
-        banner.style.fontSize = "0.95rem";
-        banner.style.fontWeight = "600";
-        banner.style.position = "sticky";
-        banner.style.top = "0";
-        banner.style.zIndex = "10000";
-        banner.style.borderBottom = "1px solid #333";
-        document.body.prepend(banner);
-    }
-    return banner;
+    // Only use an existing banner; do not auto-create on pages that don't include it.
+    return document.getElementById("topBanner") || null;
 }
 
 /**
@@ -130,8 +121,8 @@ function showErrorBanner(message) {
     lastError = message;
     console.error("[ChoreBoard ERROR]", message);
     const banner = getOrCreateBanner();
-    banner.style.background = "#922";
-    banner.style.color = "#fff";
+    if (!banner) return;
+    banner.classList.add("error");
     banner.textContent = message;
 }
 
@@ -155,7 +146,7 @@ function showPointsBanner(pointsMap) {
     if (lastError) return; // don't override error banners
 
     const banner = getOrCreateBanner();
-    banner.style.color = "#eee";
+    if (!banner) return;
 
     const meta = pointsMap["_meta"] || {};
     const lastReset = meta.lastReset || null;
@@ -165,7 +156,7 @@ function showPointsBanner(pointsMap) {
     const ymd = toYMD(today);
 
     const shouldWarn = isSunday && lastReset !== ymd;
-    banner.style.background = shouldWarn ? "#a33" : "#181818";
+    banner.classList.toggle("warn", !!shouldWarn);
 
     const parts = USERS.map(u => {
         const info = pointsMap[u] || {};
@@ -218,7 +209,13 @@ function safeJsonParse(raw, contextLabel) {
 document.addEventListener("DOMContentLoaded", () => {
     console.log("%c[ChoreBoard] DOM Loaded", "color:#0f0");
     initDateDisplay();
-    initUserModal();
+    // Load points ASAP so top banner doesn't stay on the placeholder
+    // We also load again after chores to keep existing flow.
+    loadPoints();
+    // Only initialize the user modal on pool pages where multi-user selection is needed
+    if (PAGE_MODE === 'pool') {
+        initUserModal();
+    }
     loadChores();
 
     // Auto-refresh page every 15 minutes
@@ -401,29 +398,7 @@ async function loadChores() {
         return;
     }
 
-    const todayStr = toYMD(new Date());
-let changed = false;
-
-allChores.forEach(chore => {
-    if (chore.claimExpires && chore.claimExpires < todayStr) {
-        // Reset claim assignment
-        chore.assignedTo = "";
-        chore.inPool = true;
-        chore.claimExpires = "";
-        changed = true;
-    }
-});
-
-// If anything changed, save to server
-if (changed) {
-    fetch(`${API_BASE}/save_chores.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(allChores)
-    });
-}
-
-
+    // Use the freshly fetched list immediately
     allChores = data;
     choresById = {};
     for (const c of allChores) {
@@ -535,6 +510,15 @@ async function loadStreak() {
  * @return {void} This method does not return any value. It performs DOM updates to display chores.
  */
 function renderChores() {
+    // On per-user pages, we don't show the public pool grid
+    if (PAGE_MODE === 'user') {
+        const grid = document.getElementById("choreGrid");
+        const noMsg = document.getElementById("noChoresMessage");
+        if (grid) grid.innerHTML = "";
+        if (grid) grid.style.display = 'none';
+        if (noMsg) noMsg.classList.add('hidden');
+        return;
+    }
     const grid = document.getElementById("choreGrid");
     const noMsg = document.getElementById("noChoresMessage");
 
@@ -557,6 +541,9 @@ function renderChores() {
 
             // Only public chores
             if (!chore.inPool) continue;
+
+            // Skip chores that are already assigned to a user — pool should show only unassigned
+            if (chore.assignedTo && String(chore.assignedTo).trim() !== "") continue;
 
             // Skip chores that are not spawning
             if (!chore.spawn) continue;
@@ -703,7 +690,8 @@ function renderAssignedChores() {
     }
 
     // Build UI
-    USERS.forEach(user => {
+    const buildForUsers = (PAGE_MODE === 'user' && PAGE_USER) ? [PAGE_USER] : USERS;
+    buildForUsers.forEach(user => {
         const list = userChores[user];
         if (!list || list.length === 0) return;
 
@@ -1186,6 +1174,62 @@ function dateDiffInDays(a, b) {
 }
 
 // ---------------------------------------------------------------
+// FORMATTERS
+// ---------------------------------------------------------------
+/**
+ * Returns a human-friendly frequency label for a chore.
+ * Safe against missing fields and unknown types.
+ *
+ * @param {Object} chore
+ * @return {string}
+ */
+function formatFrequency(chore) {
+    try {
+        const typeRaw = chore && chore.frequencyType ? chore.frequencyType : "daily";
+        const type = String(typeRaw).trim().toLowerCase();
+
+        const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+        switch (type) {
+            case "daily":
+                return chore && chore.afterDinner ? "Daily (after dinner)" : "Daily";
+
+            case "weekly": {
+                const d = typeof chore?.weeklyDay === "number" && chore.weeklyDay >= 0 && chore.weeklyDay <= 6
+                    ? weekdays[chore.weeklyDay]
+                    : null;
+                return d ? `Weekly (on ${d})` : "Weekly";
+            }
+
+            case "every_x_days":
+            case "custom": {
+                const n = Number(chore?.customDays || 0);
+                if (Number.isFinite(n) && n > 0) return `Every ${n} day${n === 1 ? "" : "s"}`;
+                return "Custom interval";
+            }
+
+            case "monthly":
+                return "Monthly";
+
+            case "after": {
+                const parent = chore?.afterChoreId ? choresById[chore.afterChoreId] : null;
+                const parentName = parent?.name || chore?.afterChoreId || "parent chore";
+                return `After: ${parentName}`;
+            }
+
+            case "cron":
+                return "Scheduled";
+
+            default:
+                return String(typeRaw);
+        }
+    } catch (e) {
+        console.warn("[ChoreBoard] formatFrequency error:", e);
+        return "";
+    }
+}
+
+// ---------------------------------------------------------------
 // USER MODAL
 // ---------------------------------------------------------------
 /**
@@ -1263,6 +1307,14 @@ if (confirmBtn) {
  * @return {void} This function does not return a value.
  */
 function openUserModal(chore) {
+    // On per-user pages, bypass the modal and immediately mark for that user
+    if (PAGE_MODE === 'user' && PAGE_USER) {
+        selectedChore = chore;
+        selectedUser = new Set([PAGE_USER]);
+        // Directly mark complete for this user
+        markChore(chore, PAGE_USER);
+        return;
+    }
     selectedChore = chore;
     selectedUser = new Set();
 

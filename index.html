@@ -2,15 +2,28 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Chore Manager</title>
+    <title>Chore Manager — Overview</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="style.css">
+    <script>
+        // Overview shows the same as pool: unassigned chores in grid + assigned by user below
+        window.PAGE_MODE = 'pool';
+        window.PAGE_USER = null;
+    </script>
 </head>
 <body>
-    <header>
-        <h1>Chore Manager</h1>
-        <div id="dateDisplay"></div>
-    </header>
+    <div id="headerContainer"></div>
+    <script>
+        // Synchronously load shared header so DOMContentLoaded handlers in script.js see #dateDisplay
+        try {
+            var xhrH = new XMLHttpRequest();
+            xhrH.open('GET', 'header.html', false); // sync
+            xhrH.send(null);
+            if (xhrH.status >= 200 && xhrH.status < 300 && xhrH.responseText) {
+                document.getElementById('headerContainer').outerHTML = xhrH.responseText;
+            }
+        } catch (e) { /* no-op fallback */ }
+    </script>
 
     <main>
         <div id="choreGrid" class="chore-grid">
@@ -48,9 +61,18 @@
     </div>
 
 
-    <footer id="streakFooter" class="streak-footer">
-    Current streak: <span id="streakValue">0</span> weeks
-    </footer>
+    <div id="footerContainer"></div>
+    <script>
+        // Synchronously load shared footer so script.js can populate #streakValue/#streakFooter
+        try {
+            var xhrF = new XMLHttpRequest();
+            xhrF.open('GET', 'footer.html', false); // sync
+            xhrF.send(null);
+            if (xhrF.status >= 200 && xhrF.status < 300 && xhrF.responseText) {
+                document.getElementById('footerContainer').outerHTML = xhrF.responseText;
+            }
+        } catch (e) { /* no-op fallback */ }
+    </script>
 
     <script src="script.js"></script>
 </body>

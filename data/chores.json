@@ -108,14 +108,14 @@
         "lastMarkedDate": "2025-12-01",
         "lastMarkedBy": "ash",
         "timesMarkedOff": 16,
-        "inPool": false,
-        "assignedTo": "ash",
+        "inPool": true,
+        "assignedTo": "",
         "value": 50,
         "afterDinner": true,
         "undesirable": false,
         "eligibleUsers": [],
-        "claimed": true,
-        "claimedDate": "2025-12-01"
+        "claimed": false,
+        "claimedDate": ""
     },
     {
         "id": "clean_kitchen_after_dinner",
@@ -604,14 +604,14 @@
         "lastMarkedDate": "2025-12-01",
         "lastMarkedBy": "vast, cylis",
         "timesMarkedOff": 3,
-        "inPool": false,
-        "assignedTo": "vast",
+        "inPool": true,
+        "assignedTo": "",
         "value": 50,
         "afterDinner": false,
         "undesirable": false,
         "eligibleUsers": [],
-        "claimed": true,
-        "claimedDate": "2025-12-01"
+        "claimed": false,
+        "claimedDate": ""
     },
     {
         "id": "clean_up_dog_poop",

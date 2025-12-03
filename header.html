@@ -1,0 +1,65 @@
+<!-- Shared header partial. Safe to embed or open directly. -->
+<link rel="stylesheet" href="style.css">
+<div id="topBanner" aria-live="polite">Loading points&nbsp;&hellip;</div>
+<header class="site-header">
+    <h1>Chore Manager &mdash; Overview</h1>
+    <div id="dateDisplay"></div>
+</header>
+
+<!-- Lightweight points loader when this partial is opened directly.
+     When embedded into index.html, script.js will handle the banner.
+-->
+<script>
+  (function(){
+    // If the main app script is present, let it handle points.
+    if (window.loadPoints || window.showPointsBanner) return;
+
+    // Minimal safe JSON parse (mirrors behavior in script.js but simplified)
+    function safeParse(raw){
+      try { return JSON.parse(raw); } catch(e) {
+        var i = raw.search(/[\[{\"]/);
+        if (i > 0) {
+          try { return JSON.parse(raw.slice(i)); } catch(e2) {}
+        }
+        return null;
+      }
+    }
+
+    function updateBanner(obj){
+      var banner = document.getElementById('topBanner');
+      if (!banner || !obj) return;
+      var users = ['ash','vast','sephy','hope','cylis','phil','selina'];
+      var parts = users.map(function(u){
+        var pts = (obj[u] && typeof obj[u].points !== 'undefined') ? obj[u].points : 0;
+        return u + ' ' + pts;
+      });
+      banner.textContent = parts.join(' | ');
+    }
+
+    function loadPointsLight(){
+      try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'api/get_points.php?ts=' + Date.now(), true);
+        xhr.onreadystatechange = function(){
+          if (xhr.readyState === 4) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              var data = safeParse(xhr.responseText);
+              if (data) updateBanner(data);
+            } else {
+              // leave placeholder on failure
+            }
+          }
+        };
+        xhr.send();
+      } catch(e) {
+        // noop
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadPointsLight);
+    } else {
+      loadPointsLight();
+    }
+  })();
+</script>

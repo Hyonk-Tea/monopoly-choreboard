@@ -1,0 +1,58 @@
+<!-- Shared footer partial. Safe to embed or open directly. -->
+<link rel="stylesheet" href="style.css">
+<footer id="streakFooter" class="streak-footer" aria-live="polite">
+    Current streak: <span id="streakValue">0</span> weeks
+    
+</footer>
+
+<!-- Lightweight streak loader when this partial is opened directly.
+     When embedded into index.html, script.js will handle the streak. -->
+<script>
+  (function(){
+    // If the main app provides loadStreak, let it handle updates
+    if (window.loadStreak) return;
+
+    function safeParse(raw){
+      try { return JSON.parse(raw); } catch(e) {
+        var i = raw.search(/[\[{\"]/);
+        if (i > 0) {
+          try { return JSON.parse(raw.slice(i)); } catch(e2) {}
+        }
+        return null;
+      }
+    }
+
+    function updateStreak(obj){
+      var el = document.getElementById('streakValue');
+      if (!el || !obj) return;
+      var weeks = (typeof obj.weeks !== 'undefined' && obj.weeks !== null) ? obj.weeks : 0;
+      el.textContent = weeks;
+    }
+
+    function loadStreakLight(){
+      try {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'api/get_streak.php?ts=' + Date.now(), true);
+        xhr.onreadystatechange = function(){
+          if (xhr.readyState === 4) {
+            if (xhr.status >= 200 && xhr.status < 300) {
+              var data = safeParse(xhr.responseText);
+              if (data) updateStreak(data);
+            } else {
+              // Leave default value on failure
+            }
+          }
+        };
+        xhr.send();
+      } catch(e) {
+        // noop
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadStreakLight);
+    } else {
+      loadStreakLight();
+    }
+  })();
+  </script>
