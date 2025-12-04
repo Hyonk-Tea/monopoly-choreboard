@@ -243,3 +243,33 @@ function cronMatchDow($field, DateTime $now) {
 
     return cronMatchField($field, $dow, $now);
 }
+
+// -----------------------------------------------------------------------------
+// LIGHTWEIGHT TESTER ENDPOINT (optional):
+// Call /api/cron_eval.php?expr=MIN HOUR DOM MON DOW[&tz=America/Chicago]
+// to get a JSON result indicating whether it matches "now".
+// This block is safe when this file is included by other PHP scripts because it
+// runs only on direct web access with the 'expr' query param set.
+// -----------------------------------------------------------------------------
+if (php_sapi_name() !== 'cli' && isset($_GET['expr'])) {
+    header('Content-Type: application/json');
+
+    $expr = trim((string)($_GET['expr'] ?? ''));
+    $tz   = trim((string)($_GET['tz'] ?? 'America/Chicago'));
+
+    try {
+        $dt = new DateTime('now', new DateTimeZone($tz ?: 'America/Chicago'));
+    } catch (Exception $e) {
+        $dt = new DateTime('now', new DateTimeZone('America/Chicago'));
+    }
+
+    $match = doesCronMatchToday($expr, $dt);
+
+    echo json_encode([
+        'expr' => $expr,
+        'now'  => $dt->format('Y-m-d H:i:s'),
+        'tz'   => $dt->getTimezone()->getName(),
+        'match' => $match
+    ]);
+    exit;
+}
